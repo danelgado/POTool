@@ -1,0 +1,561 @@
+<div class="navigation-wrapper">
+    <div class="sidenav scrollable">
+        <div class="sidenav-info">
+            <div class="header-logo">
+                <i class="icon_homedepot"></i>
+            </div>
+            <label class="sidenav-user">Tool Portal</label>
+            <label class="sidenav-location">TheHomeDepot | Contingent Labor</label>
+            <a class="fab" href="#"><span style="font-size: 20pt"><i class="icon_home"></i></span>Home</a>
+        </div>
+        <ul class="nav">
+            <li><a href="//cwci.apps-np.homedepot.com//po" class="active"><i class="icon_parking"></i><i class="icon_dollar_symbol_filled"></i>PO Window</a></li>
+            <!--><li><a href="/po" class="active"><i class="icon_nav_dashboard"></i>Dashboard</a></li>
+            <li><a href="/po"><i class="icon_nav_esvs"></i>ESVS</a></li>
+            <li><a href="/po"><i class="icon_nav_quote_center"></i>HD Quote Center</a></li>
+            <li><a href="/po"><i class="icon_nav_proxtra"></i>Pro Xtra</a>
+            <li><a href="/po"><i class="icon_nav_hd_online"></i>HD.com</a>
+            <li><a href="/po"><i class="icon_nav_spos"></i>SPOS</a></li>
+            <li><a href="/po"><i class="icon_nav_appliance_ordering"></i>Appliance Ordering</a></li><-->
+        </ul>
+    </div>
+    <section class="content-area with-header">
+        <!-->Header with User Data / Icon Buttons<-->
+        <div class="header">
+            <div class="header-search">
+            </div>
+            <div class="header-info">
+                <h3>
+                    USER: <span style="color:#FF6501">{{USER}}</span> &emsp;&emsp;&emsp; ACCESS: <span style="color:#CC1111">{{STATUS}}</span>
+                </h3>
+            </div>
+            <div class="header-actions">
+                <div><i class="icon_account"></i></div>
+                <div><i class="icon_settings"></i></div>
+            </div>
+        </div>
+        <div class="content">
+            <!-->PO Number Entry      and      "Send Changes" Button<-->
+            <table>
+                <tr>
+                    <td>
+                        <h2>Enter PO Number</h2>
+                    </td>
+                    <td>
+                        <form (submit)="POCall(num.value)">
+                            <input type="text" #num />
+                        </form>
+                    </td>
+                    <td *ngIf="currentlySending" style="color:#FF6501">
+                        Sending...
+                    </td>
+                    <td>
+                        9001256730
+                    </td>
+                    <td *ngIf="makeChanges">
+                        &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+                        <button class="button primary lg" (click)="SendChanges()">Send Changes</button>
+                    </td>
+                </tr>
+            </table>
+            <!-->Warning/Success Banners for POChanges Requests<-->
+            <div> 
+                <div class="banner error" *ngIf='EqualityCheck(finalResponseCode,"1")'>
+                    <span class="message">Error: "{{finalResponseMessage}}"</span>
+                    <span class="close" (click)='finalResponseCode=""'></span>
+                </div>
+                <div class="banner success" *ngIf='EqualityCheck(finalResponseCode,"0")'>
+                    <span class="message">"{{finalResponseMessage}}"</span>
+                    <span class="close" (click)='finalResponseCode=""'></span>
+                </div>
+                <div class="banner warning" *ngIf='EqualityCheck(finalResponseCode,"9")'>
+                    <span class="message">"{{finalResponseMessage}}"</span>
+                    <span class="close" (click)='finalResponseCode=""'></span>
+                </div>
+            </div>
+            <hr />
+            <!-->Buttons: Enable/Disable Changes      &      Restore PO<-->
+            <table *ngIf="currentPO.ER_RESPONSE.PO_NUMBER > 0">
+                <tr>
+                    <td>
+                        <button class="button primary md" (click)="EnableChanges()">{{change}} Changes</button><br>
+                    </td>
+                    <!-->
+                    <td>
+                        <button class="button primary md" (click)="LookAtPO()">PO Status</button><br>
+                    </td>
+                    <td>
+                        <button class="button secondary md" (click)="LookAtPORequest()">PO Request Status</button><br>
+                    </td><-->
+                    <td>
+                        <button class="button primary md" (click)="RestorePOObject()">Restore PO Object</button><br>
+                    </td>
+                </tr>
+            </table>
+            <!--> Form for PO details changes / PO_ITEM search entry / PO_ITEM changes <-->
+            <form>
+                <!-->initial PO Object table/contents<-->
+                <div *ngIf="currentPO.ER_RESPONSE.RESPONSE_CODE">
+                    <table>
+                        <!-->just spacing for table<-->
+                        <tr>
+                            <td>
+                                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+                            </td>
+                            <td>
+                                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+                            </td>  
+                        </tr> 
+                        <!-->PO_NUMBER<-->
+                        <tr bgcolor="#CCCCCC" *ngIf="(currentPO.ER_RESPONSE.RESPONSE_CODE == 0)">
+                            <td>
+                                PO_NUMBER: 
+                            </td>
+                            <td>
+                                {{currentPO.ER_RESPONSE.PO_NUMBER}}
+                            </td>
+                        </tr>
+                        <!-->BEELINE_ID<-->
+                        <tr *ngIf="(currentPO.ER_RESPONSE.RESPONSE_CODE == 0)">
+                            <td>
+                                BEELINE_ID: 
+                            </td>
+                            <td>
+                                {{currentPO.ER_RESPONSE.BEELINE_ID}}
+                            </td>
+                        </tr>
+                        <!-->RESPONSE_CODE<-->
+                        <tr bgcolor="#CCCCCC" *ngIf="!(currentPO.ER_RESPONSE.RESPONSE_CODE == 0)">
+                            <td>
+                                RESPONSE_CODE: 
+                            </td>
+                            <td>
+                                {{currentPO.ER_RESPONSE.RESPONSE_CODE}}
+                            </td>
+                        </tr>
+                        <!-->RESPONSE_MESSAGE<-->
+                        <tr *ngIf="!(currentPO.ER_RESPONSE.RESPONSE_CODE == 0)">
+                            <td>
+                                RESPONSE_MESSAGE: 
+                            </td>
+                            <td>
+                                {{currentPO.ER_RESPONSE.RESPONSE_MESSAGE}}
+                            </td>
+                        </tr>
+                        <!-->SOW_ID<-->
+                        <tr bgcolor="#CCCCCC" *ngIf="(currentPO.ER_RESPONSE.RESPONSE_CODE == 0)">
+                            <td>
+                                SOW_ID: 
+                            </td>
+                            <td>
+                                {{currentPO.ER_RESPONSE.SOW_ID}}
+                            </td>
+                        </tr>
+                        <!-->VENDOR_NUMBER<-->
+                        <tr *ngIf="(currentPO.ER_RESPONSE.RESPONSE_CODE == 0)">
+                            <td>
+                                VENDOR_NUMBER: 
+                            </td>
+                            <td>
+                                {{currentPO.ER_RESPONSE.VENDOR_NUMBER}}
+                            </td>
+                        </tr>
+                        <!-->SUBORDINATE_VENDOR<-->
+                        <tr bgcolor="#CCCCCC" *ngIf="(currentPO.ER_RESPONSE.RESPONSE_CODE == 0)">
+                            <td>
+                                SUBORDINATE_VENDOR: 
+                            </td>
+                            <td>
+                                {{currentPO.ER_RESPONSE.SUBORDINATE_VENDOR}}
+                            </td>
+                        </tr>
+                        <!-->ASSIGNMENT_START_DATE<-->
+                        <tr *ngIf="(currentPO.ER_RESPONSE.RESPONSE_CODE == 0)">
+                            <td>
+                                ASSIGNMENT_START_DATE: 
+                            </td>
+                            <td *ngIf ="!makeChanges">
+                                {{currentPO.ER_RESPONSE.ASSIGNMENT_START_DATE}}
+                            </td>
+                            <td *ngIf ="makeChanges">
+                                <input type="text" name="currentPO.ER_RESPONSE.ASSIGNMENT_START_DATE" [(ngModel)]="currentPO.ER_RESPONSE.ASSIGNMENT_START_DATE" />
+                            </td>
+                            <td *ngIf="!(EqualityCheck(currentPO.ER_RESPONSE.ASSIGNMENT_START_DATE, backupPO.ER_RESPONSE.ASSIGNMENT_START_DATE))">
+                                <small style="color:#FF0000">&emsp;&emsp; ...changed from "{{backupPO.ER_RESPONSE.ASSIGNMENT_START_DATE}}"</small>
+                            </td>
+                            <td *ngIf="currentPO.ER_RESPONSE.ASSIGNMENT_START_DATE.length != 10">
+                                <b style="color:#FF0000">&emsp;&emsp; ...INVALID DATE... Must be in format: "MM/DD/YYYY"</b>
+                            </td>
+                        </tr>
+                        <!-->ASSIGNMENT_END_DATE<-->
+                        <tr bgcolor="#CCCCCC" *ngIf="(currentPO.ER_RESPONSE.RESPONSE_CODE == 0)">
+                            <td>
+                                ASSIGNMENT_END_DATE: 
+                            </td>
+                            <td *ngIf ="!makeChanges">
+                                {{currentPO.ER_RESPONSE.ASSIGNMENT_END_DATE}}
+                            </td>
+                            <td *ngIf ="makeChanges">
+                                <input type="text" name="currentPO.ER_RESPONSE.ASSIGNMENT_END_DATE" [(ngModel)]="currentPO.ER_RESPONSE.ASSIGNMENT_END_DATE" />
+                            </td>
+                            <td *ngIf="!(EqualityCheck(currentPO.ER_RESPONSE.ASSIGNMENT_END_DATE, backupPO.ER_RESPONSE.ASSIGNMENT_END_DATE))">
+                                <small style="color:#FF0000">&emsp;&emsp; ...changed from "{{backupPO.ER_RESPONSE.ASSIGNMENT_END_DATE}}"</small>
+                            </td>
+                            <td *ngIf="currentPO.ER_RESPONSE.ASSIGNMENT_END_DATE.length != 10">
+                                <span style="color:#FF0000">&emsp;&emsp; ...INVALID DATE... Must be in format: "MM/DD/YYYY"</span>
+                            </td>
+                        </tr>
+                        <!-->FY (fiscal year)<-->
+                        <tr *ngIf="(currentPO.ER_RESPONSE.RESPONSE_CODE == 0)">
+                            <td *ngIf ="makeChanges">
+                                FISCAL_YEAR: 
+                            </td>
+                            <td *ngIf ="makeChanges">
+                                <input type="text" name="IR_PO_DATA.FY" [(ngModel)]="IR_PO_DATA.FY" />
+                            </td>
+                        </tr>
+                        <!-->LABOR_TYPE<-->
+                        <tr bgcolor="#CCCCCC" *ngIf="(currentPO.ER_RESPONSE.RESPONSE_CODE == 0)">
+                            <td *ngIf ="makeChanges">
+                                LABOR_TYPE: 
+                            </td>
+                            <td *ngIf ="makeChanges">
+                                {{IR_PO_DATA.LABOR_TYPE}}
+                            </td>
+                        </tr>
+                        <!-->PO_ITEMS<-->
+                        <tr *ngIf="(currentPO.ER_RESPONSE.RESPONSE_CODE == 0)">
+                            <td>
+                                PO_ITEMS ({{currentPO.ER_RESPONSE.PO_ITEMS.length}}): 
+                            </td>
+                            <td>
+                                &emsp;
+                            </td>
+                            <td *ngIf="!(EqualityCheck(currentPO.ER_RESPONSE.PO_ITEMS, backupPO.ER_RESPONSE.PO_ITEMS))">
+                                <span style="color:#FF0000">&emsp;&emsp; PO_ITEM(s) changes present"</span>
+                            </td>
+                        </tr>
+                    </table>
+                    <hr />
+                </div>
+                <!-->PO_ITEM[] View Options<-->
+                <table *ngIf="currentPO.ER_RESPONSE.PO_ITEMS.length>0">
+                    <tr>
+                        <td *ngIf="!displayAll">
+                            <button class="button secondary sm" (click)="poItemSearch = false; displayAll = true; displayNewest = false">Display All PO_ITEMS</button>
+                        </td>
+                        <td *ngIf="!displayNewest">
+                            <button class="button secondary sm" (click)="poItemSearch = false; displayAll = false; displayNewest = true">Display Newest PO_ITEM</button>
+                        </td>
+                        <td *ngIf="!poItemSearch">
+                            <button class="button secondary sm" (click)="poItemSearch = true; displayAll = false; displayNewest = false">Display Specific PO_ITEM</button>
+                        </td>
+                        <td *ngIf="poItemSearch">
+                        Input Project ID: 
+                        </td>
+                        <td *ngIf="poItemSearch">
+                            <input type="text" name="searchProjectID" [(ngModel)]="searchProjectID" />
+                        </td>
+                        <td *ngIf="makeChanges">
+                            <button class="button primary sm" (click)="NewPOItem()">CREATE NEW PO_ITEM</button>
+                        </td>
+                    </tr>
+                </table>
+                <!-->PO_ITEM[] accordion container (list of PO_ITEMS)<-->
+                <div class="accordion-container" *ngFor = "let x of currentPO.ER_RESPONSE.PO_ITEMS.slice().reverse(); let i=index">
+                    <div class="ac-section" *ngIf="displayAll || (x.PROJECT_ID == searchProjectID && poItemSearch) || (displayNewest && (i == 0))">
+                        <input id="{{'object-' + i}}" type="checkbox" name="accordion-2" bgcolor="#000099">
+                        <label for="{{'object-' + i}}"><span style="color:#AAAAAA">PO_ITEM: {{x.PO_ITEM}} </span> &emsp;&emsp;&emsp; <small>{{x.PROJECT_ID}} : {{x.CAP_EXP}} &emsp;&emsp; ({{x.START_DATE}} - {{x.END_DATE}}) &emsp;&emsp;<span style="color:#FF6501">RECEIVED_QUANTITY: {{x.QTY - x.AVAIL_QUANTITY}} &emsp;&emsp;</span><span *ngIf="AvailableQuantityBool(x.AVAIL_QUANTITY)" style="color:#008800"> AVAIL_QUANTITY: {{x.AVAIL_QUANTITY}}</span><span *ngIf="!AvailableQuantityBool(x.AVAIL_QUANTITY)" style="color:#ff6666"> AVAIL_QUANTITY: {{x.AVAIL_QUANTITY}}</span></small> <span *ngIf ="!(EqualityCheck(x,REVERSE_PO_ITEMS[i]))" style="color:#FF0000">&emsp;&emsp;&emsp;&emsp; **CHANGES MADE**</span><span *ngIf ="NewPOItemCheck(i)" style="color:#FF0000">&emsp;&emsp;&emsp;&emsp; **NEW PO_ITEM**</span></label>
+                        <div class="ac-content-container">
+                            <div class="ac-content">
+                                <table>
+                                    <!-->Restore PO_ITEM button and Delete PO_ITEM button<-->
+                                    <tr>
+                                        <td *ngIf ="!(EqualityCheck(x, REVERSE_PO_ITEMS[i]))">
+                                            <button class="button primary md" (click)="RestorePOItem(i)">Restore PO_ITEM</button><br>
+                                        </td>
+                                        <td *ngIf ="NewPOItemCheck(i)">
+                                            <button class="button primary md" (click)="DeletePOItem(i)">Delete PO_ITEM</button><br>
+                                        </td>
+                                    </tr>
+                                    <!-->PO_ITEM<-->
+                                    <tr bgcolor="#FED4B9">
+                                        <td>
+                                            PO_ITEM: 
+                                        </td>
+                                        <td>
+                                            {{x.PO_ITEM}}
+                                        </td>
+                                    </tr>
+                                    <!-->RESOURCE<-->
+                                    <tr>
+                                        <td>
+                                            RESOURCE: 
+                                        </td>
+                                        <td>
+                                            {{x.RESOURCE}}
+                                        </td>
+                                    </tr>
+                                    <!-->MILESTONE_TYPE<-->
+                                    <tr bgcolor="#FED4B9">
+                                        <td>
+                                            MILESTONE_TYPE: 
+                                        </td>
+                                        <td *ngIf="!(makeChanges && NewPOItemCheck(i))">
+                                            {{x.MILESTONE_TYPE}}
+                                        </td>
+                                        <td *ngIf="(makeChanges && NewPOItemCheck(i) && !x.JOB)">
+                                            <input type="text" name="{{'MILESTONE_TYPE-'+i}}" [(ngModel)]="x.MILESTONE_TYPE" />
+                                        </td>
+                                    </tr>
+                                    <!-->JOB<-->
+                                    <tr>
+                                        <td>
+                                            JOB: 
+                                        </td>
+                                        <td>
+                                            {{x.JOB}}
+                                        </td>
+                                    </tr>
+                                    <!-->MILESTONE_ID<-->
+                                    <tr bgcolor="#FED4B9">
+                                        <td>
+                                            MILESTONE_ID: 
+                                        </td>
+                                        <td *ngIf="!(makeChanges && NewPOItemCheck(i))">
+                                            {{x.MILESTONE_ID}}
+                                        </td>
+                                        <td *ngIf="(makeChanges && NewPOItemCheck(i) && !x.JOB)">
+                                            <input type="text" name="{{'MILESTONE_ID-'+i}}" [(ngModel)]="x.MILESTONE_ID" />
+                                        </td>
+                                    </tr>
+                                    <!-->UOM<-->
+                                    <tr>
+                                        <td>
+                                            UOM: 
+                                        </td>
+                                        <td>
+                                            {{x.UOM}}
+                                        </td>
+                                    </tr>
+                                    <!-->QTY<-->
+                                    <tr bgcolor="#FED4B9">
+                                        <td>
+                                            QTY: 
+                                        </td>
+                                        <td *ngIf="!makeChanges">
+                                            {{x.QTY}}
+                                        </td>
+                                        <td *ngIf="makeChanges">
+                                            <input type="text" name="{{'QTY-'+i}}" [(ngModel)]="x.QTY" />
+                                        </td>
+                                    </tr>
+                                    <!-->COST_CENTER<-->
+                                    <tr *ngIf="REVERSE_PO_ITEMS[i].COST_CENTER || NewPOItemCheck(i)">
+                                        <td>
+                                            COST_CENTER: 
+                                        </td>
+                                        <td *ngIf="!makeChanges">
+                                            {{x.COST_CENTER}}
+                                        </td>
+                                        <td *ngIf="makeChanges">
+                                            <input type="text" name="{{'COST_CENTER-'+i}}" [(ngModel)]="x.COST_CENTER" />
+                                        </td>
+                                    </tr>
+                                    <!-->REQ_COST_CENTER<-->
+                                    <tr *ngIf="REVERSE_PO_ITEMS[i].REQ_COST_CENTER">
+                                        <td *ngIf="!(makeChanges && REVERSE_PO_ITEMS[i].COST_CENTER)">
+                                            REQ_COST_CENTER: 
+                                        </td>
+                                        <td *ngIf="!makeChanges">
+                                            {{x.REQ_COST_CENTER}}
+                                        </td>
+                                        <td *ngIf="makeChanges && !REVERSE_PO_ITEMS[i].COST_CENTER">
+                                            <input type="text" name="{{'REQ_COST_CENTER-'+i}}" [(ngModel)]="x.REQ_COST_CENTER" />
+                                        </td>
+                                    </tr>
+                                    <!-->PROJECT_ID<-->
+                                    <tr bgcolor="#FED4B9">
+                                        <td>
+                                            PROJECT_ID: 
+                                        </td>
+                                        <td *ngIf="!(NewPOItemCheck(i) && makeChanges)">
+                                            {{x.PROJECT_ID}}
+                                        </td>
+                                        <td *ngIf="(NewPOItemCheck(i) && makeChanges)">
+                                            <input type="text" name="{{'PROJECT_ID-'+i}}" [(ngModel)]="x.PROJECT_ID" />
+                                        </td>
+                                    </tr>
+                                    <!-->CAP_EXP<-->
+                                    <tr>
+                                        <td>
+                                            CAP_EXP: 
+                                        </td>
+                                        <td *ngIf="!(NewPOItemCheck(i) && makeChanges)">
+                                            {{x.CAP_EXP}}
+                                        </td>
+                                        <td *ngIf="(NewPOItemCheck(i) && makeChanges)">
+                                            <input type="text" name="{{'CAP_EXP-'+i}}" [(ngModel)]="x.CAP_EXP" />
+                                        </td>
+                                    </tr>
+                                    <!-->AVAIL_BUDGET<-->
+                                    <tr bgcolor="#FED4B9">
+                                        <td *ngIf ="!(makeChanges || NewPOItemCheck(i))">
+                                            AVAIL_BUDGET: 
+                                        </td>
+                                        <td *ngIf ="!(makeChanges || NewPOItemCheck(i))">
+                                            {{x.AVAIL_BUDGET}}
+                                        </td>
+                                    </tr>
+                                    <!-->AVAIL_QUANTITY<-->
+                                    <tr>
+                                        <td *ngIf ="!(makeChanges || NewPOItemCheck(i))">
+                                            AVAIL_QUANTITY: 
+                                        </td>
+                                        <td *ngIf ="!(makeChanges || NewPOItemCheck(i))">
+                                            {{x.AVAIL_QUANTITY}}
+                                        </td>
+                                    </tr>
+                                    <!-->UNIT_PRICE<-->
+                                    <tr bgcolor="#FED4B9">
+                                        <td>
+                                            UNIT_PRICE: 
+                                        </td>
+                                        <td *ngIf="!(NewPOItemCheck(i) && makeChanges)">
+                                            {{x.UNIT_PRICE}}
+                                        </td>
+                                        <td *ngIf="(NewPOItemCheck(i) && makeChanges)">
+                                            <input type="text" name="{{'UNIT_PRICE-'+i}}" [(ngModel)]="x.UNIT_PRICE" />
+                                        </td>
+                                    </tr>
+                                    <!-->RATE_TYPE<-->
+                                    <tr>
+                                        <td>
+                                            RATE_TYPE: 
+                                        </td>
+                                        <td *ngIf="!(NewPOItemCheck(i) && makeChanges)">
+                                            {{x.RATE_TYPE}}
+                                        </td>
+                                        <td *ngIf="(NewPOItemCheck(i) && makeChanges)">
+                                            <input type="text" name="{{'RATE_TYPE-'+i}}" [(ngModel)]="x.RATE_TYPE" />
+                                        </td>
+                                    </tr>
+                                    <!-->START_DATE<-->
+                                    <tr bgcolor="#FED4B9">
+                                        <td>
+                                            START_DATE: 
+                                        </td>
+                                        <td *ngIf="!makeChanges">
+                                            {{x.START_DATE}}
+                                        </td>
+                                        <td *ngIf="makeChanges">
+                                            <input type="text" name="{{'START_DATE-'+i}}" [(ngModel)]="x.START_DATE" />
+                                        </td>
+                                        <td *ngIf="x.START_DATE.length != 10">
+                                            <span style="color:#FF0000">&emsp;&emsp; ...INVALID DATE... Must be in format: "MM/DD/YYYY"</span>
+                                        </td>
+                                    </tr>
+                                    <!-->END_DATE-->
+                                    <tr>
+                                        <td>
+                                            END_DATE: 
+                                        </td>
+                                        <td *ngIf="!makeChanges">
+                                            {{x.END_DATE}}
+                                        </td>
+                                        <td *ngIf="makeChanges">
+                                            <input type="text" name="{{'END_DATE-'+i}}" [(ngModel)]="x.END_DATE" />
+                                        </td>
+                                        <td *ngIf="x.END_DATE.length != 10">
+                                            <span style="color:#FF0000">&emsp;&emsp; ...INVALID DATE... Must be in format: "MM/DD/YYYY"</span>
+                                        </td>
+                                    </tr>
+                                    <!-->ALLOCATION<-->
+                                    <tr bgcolor="#FED4B9">
+                                        <td>
+                                            ALLOCATION: 
+                                        </td>
+                                        <td *ngIf="!(NewPOItemCheck(i) && makeChanges)">
+                                            {{x.ALLOCATION}}
+                                        </td>
+                                        <td *ngIf="(NewPOItemCheck(i) && makeChanges)">
+                                            <input type="text" name="{{'ALLOCATION-'+i}}" [(ngModel)]="x.ALLOCATION" />
+                                        </td>
+                                    </tr>
+                                    <!-->GOODS_RECEIPTS<-->
+                                    <tr>
+                                        <td>
+                                            GOODS_RECEIPTS ({{x.GOODS_RECEIPTS.length}}): 
+                                        </td>
+                                    </tr>
+                                </table>
+                                <hr />
+                                <!-->GoodsReceipts[] accordion container<-->
+                                <div class="accordion-container" *ngFor = "let y of x.GOODS_RECEIPTS; let i2=index">
+                                    <div class="ac-section">
+                                        <input id="{{'goods-' + i + i2}}" type="checkbox" name="accordion-2" bgcolor="#000099">
+                                        <label for="{{'goods-' + i + i2}}"><span style="color:#FF6501">Goods Receipt: {{i2}} </span> &emsp;&emsp;&emsp; <small>{{y.BEELINE_INVOICE}}&emsp;&emsp; ({{y.BILLING_PERIOD}})&emsp;&emsp; QTY_RECEIVED: {{y.QTY_RECEIVED}}&emsp;&emsp; AMT_RECEIVED: {{y.AMT_RECEIVED}}</small></label>
+                                        <div class="ac-content-container">
+                                            <div class="ac-content">
+                                                <table>
+                                                    <!-->BEELINE_INVOICE<-->
+                                                    <tr bgcolor="#CCCCCC" >
+                                                        <td>
+                                                            BEELINE_INVOICE: 
+                                                        </td>
+                                                        <td>
+                                                            {{x.GOODS_RECEIPTS[i2].BEELINE_INVOICE}}
+                                                        </td>
+                                                        <!--><td *ngIf ="makeChanges">
+                                                            <input type="text" name="{{'BEELINE_INVOICE-'+i2}}" [(ngModel)]="x.GOODS_RECEIPTS[i2].BEELINE_INVOICE" />
+                                                        </td><-->
+                                                    </tr>
+                                                    <!-->BILLING_PERIOD<-->
+                                                    <tr>
+                                                        <td>
+                                                            BILLING_PERIOD: 
+                                                        </td>
+                                                        <td>
+                                                            {{y.BILLING_PERIOD}}
+                                                        </td>
+                                                        <!--><td *ngIf ="makeChanges">
+                                                            <input type="text" name="{{'BILLING_PERIOD-'+i2}}" [(ngModel)]="y.BILLING_PERIOD" />
+                                                        </td><-->
+                                                    </tr>
+                                                    <!-->QTY_RECEIVED<-->
+                                                    <tr bgcolor="#CCCCCC">
+                                                        <td>
+                                                            QTY_RECEIVED: 
+                                                        </td>
+                                                        <td>
+                                                            {{y.QTY_RECEIVED}}
+                                                        </td>
+                                                        <!--><td *ngIf ="makeChanges">
+                                                            <input type="text" name="{{'QTY_RECEIVED-'+i2}}" [(ngModel)]="y.QTY_RECEIVED" />
+                                                        </td><-->
+                                                    </tr>
+                                                    <!-->AMT_RECEIVED<-->
+                                                    <tr>
+                                                        <td>
+                                                            AMT_RECEIVED: 
+                                                        </td>
+                                                        <td>
+                                                            {{y.AMT_RECEIVED}}
+                                                        </td>
+                                                        <!--><td *ngIf ="makeChanges">
+                                                            <input type="text" name="{{'AMT_RECEIVED-'+i2}}" [(ngModel)]="y.AMT_RECEIVED" />
+                                                        </td><-->
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+</div>
